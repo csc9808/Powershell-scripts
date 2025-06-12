@@ -124,12 +124,12 @@ Last Connected Time on this USB: $lastConnectedStr
     foreach ($driveID in @($seenDrives.Keys)) {
         if (-not ($currentDriveIDs -contains $driveID)) {
             $logEntry = @"
-==== USB Disconnected ====
+==================== USB Disconnected =====================
 Time: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 Drive Letter: $driveID
-=========================
+===========================================================
 "@
-            Write-Output $logEntry
+            Write-Host $logEntry -ForegroundColor Red
             Add-Content -Path $logFile -Value $logEntry
 
             # Compare snapshots
