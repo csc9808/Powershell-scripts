@@ -35,20 +35,20 @@ while ($true) {
             # Prompt user to include hidden files or not
             $showHidden = $false
             $answer = Read-Host "Show hidden files on USB $($drive.DeviceID)? (Y/N)"
-            Write-Host ""  # This adds a blank line after the prompt
+            Write-Host ""
             if ($answer.Trim().ToUpper() -eq 'Y') {
                 $showHidden = $true
             }
 
-            # Get files from USB based on hidden files preference
+            # Get and sort files from USB
             try {
                 $files = Get-ChildItem -Path ($drive.DeviceID + "\") -Recurse -File -Force:$showHidden -ErrorAction SilentlyContinue
+                $files = $files | Sort-Object Length -Descending
             } catch {
                 $files = @()
             }
 
-
-            # Log USB connected info including last connected time from USB log file
+            # Log USB connected info
             $logEntry = @"
 ====================== USB Connected ======================
 Time: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
@@ -107,7 +107,7 @@ Last Connected Time on this USB: $lastConnectedStr
                 Write-Host ($lineStr.Substring($colWidths['LastWrite'] + 1, $colWidths['Size'])) -ForegroundColor $color -NoNewline
                 Write-Host ($lineStr.Substring($colWidths['LastWrite'] + 1 + $colWidths['Size'], $colWidths['Type'])) -NoNewline
                 Write-Host ($lineStr.Substring($colWidths['LastWrite'] + 1 + $colWidths['Size'] + $colWidths['Type']))
-                
+
                 # Log without color
                 Add-Content -Path $logFile -Value $lineStr
             }
@@ -142,7 +142,7 @@ Drive Letter: $driveID
                         $currentSnapshot = Get-ChildItem -Path ($driveID + "\") -Recurse -File -ErrorAction SilentlyContinue |
                             Select-Object FullName, LastWriteTime, Length
                     } catch {
-                        # USB is already gone, skip currentSnapshot
+                        # USB is already gone
                     }
 
                     $diffs = Compare-Object -ReferenceObject $previousSnapshot -DifferenceObject $currentSnapshot -Property FullName, LastWriteTime, Length
